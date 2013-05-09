@@ -1,0 +1,251 @@
+<html>
+<head>
+	<title>HTML/Canvas Teaching Aid</title>
+	<link rel="stylesheet" type="text/css" href="teachingAid.css">
+	<script src="jquery-1.9.1.min.js"></script>
+
+	
+
+	<script type="text/javascript">
+		var canvas;
+		var context;
+
+		var mx = 0;
+		var my = 0;
+		var mouseDown = false;
+		var shouldDrawGrid = true; 
+		mouthSize = 0;
+
+
+		window.addEventListener("load", init, false);
+		window.onmousemove = onMouseMove;
+		window.onmousedown = onMouseDown;
+		window.onmouseup = onMouseUp;
+		window.onresize = updatePositionAndWidth;
+
+		function init(){
+			canvas = document.getElementById("myCanvas");
+			context = canvas.getContext("2d");
+			
+			var code = getParameterByName("code");
+
+			if(!code){
+				code = "var x = 100;\n" + 
+				"var y = 100;\n" +
+				"var radius = 40;\n" + 
+				"context.beginPath();\n" +
+				"context.arc(x, y, radius, 0, Math.PI * 2);\n" + 
+				"context.stroke();";
+			}
+			$("#command").html(code);
+
+			updatePositionAndWidth();
+
+			onButtonClick();
+		}
+
+		function updatePositionAndWidth(){
+			var left =  $(".panel-left").outerWidth();
+			var width = window.innerWidth - left;
+			$(".panel-right").css("left", left + "px");
+			console.log("width: " + width);
+			canvas.width = width;
+			canvas.height = $(".panel-right").height();
+
+			onButtonClick();
+		}
+
+		function drawScene(){
+			context.clearRect(0,0,canvas.width, canvas.height);
+
+			if(shouldDrawGrid)
+				drawGrid();
+		}
+
+		function drawGrid(){
+			
+			context.lineWidth = 0.5;
+			context.strokeStyle = "#8888AA";
+
+			var width = canvas.width;
+			var count = canvas.height / 10;
+			var offset = 0.5;
+			for(var y = 0; y < count; y++){
+				context.beginPath();
+				context.moveTo(0, y * 10 + offset);
+				context.lineTo(width, y * 10 + offset);
+				context.stroke();
+			}
+
+			count = width / 10;
+			for(var x = 0; x < count; x++){
+				context.beginPath();
+				context.moveTo(x * 10 + offset, 0);
+				context.lineTo(x * 10 + offset, canvas.height);
+				context.stroke();
+			}
+		}
+
+		function onMouseMove(event){
+			mx = event.pageX;
+			my = event.pageY;
+
+			// drawFace();
+		}
+
+		function onMouseDown(event){
+			mouseDown = true;
+		}
+
+		function onMouseUp(event){
+			mouseDown = false;
+		}
+
+		function onDrawGridChange(event){
+			shouldDrawGrid = $("#drawGridCheckbox")[0].checked;
+			drawScene();
+			evalText();
+		}
+
+		function evalText(event){
+			drawScene();
+			context.lineWidth = 1;
+			context.strokeStyle = "#000000";
+			var text = document.getElementById("command").value;
+			//eval(text);
+			var userScript = $("#userScript")
+			if(userScript.length > 0)
+				$("#userScript").remove();
+
+			var script = document.createElement("script");
+			script.id = "userScript";
+			script.type = "text/javascript";
+			script.innerHTML = text;
+
+			document.head.appendChild(script);
+		}
+
+		function onButtonClick(){
+			var text = document.getElementById("command").value;
+			evalText(text);
+			findFloatVars(text);
+		}
+
+		function findFloatVars(text){
+			var container = document.getElementById("sliderDiv");
+			container.innerHTML = null;
+			var lines = text.split("\n");
+			for(var i = 0; i < lines.length; i++){
+				var line = lines[i];
+				if(line.indexOf("var ") == 0){
+					var endIndex = line.indexOf("=");
+					var varName = trim1(line.substring(4, endIndex));
+					var start = endIndex + 1;
+					endIndex = line.indexOf(";");
+					var value = parseFloat(trim1(line.substring(start, endIndex)));
+					if(!isNaN(value)){
+						console.log("'" + varName + "' = " + value);
+						var nameDiv = document.createElement("div");
+						nameDiv.innerHTML = varName;
+						container.appendChild(nameDiv);
+						var input = document.createElement("input");
+						input.type = "range";
+						input.min = 0;
+
+						var range = 1;
+						if(value > 2)
+							range = Math.ceil(Math.log(value + 1) / Math.log(10));
+
+						range *= 1.0;
+						input.max = Math.pow(10, range);
+						input.value = value;
+						input.name = varName;
+						input.className = "slider";
+						input.onchange = replaceTextValue;
+						container.appendChild(input);
+					}
+				}
+			}
+		}
+
+		function replaceTextValue(event){
+			console.log(event.target.name);
+
+			var text = document.getElementById("command").value;
+			var lines = text.split("\n");
+			var newText = "";
+			for(var i = 0; i < lines.length; i++){
+				var line = lines[i];
+				if(line.length == 0)
+					continue;
+				if(line.indexOf("var ") == 0){
+					var endIndex = line.indexOf("=");
+					var varName = trim1(line.substring(4, endIndex));
+					if(varName == event.target.name){
+						line = "var " + varName + " = " + event.target.value + ";";
+					}
+				}
+				newText += line + "\n";
+			}
+			document.getElementById("command").value = newText;
+			evalText();
+		}
+
+		// lifted from: Steven Levithan via http://stackoverflow.com/questions/3000649/trim-spaces-from-start-and-end-of-string
+		function trim1 (str) {
+		    return str.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+		}
+
+		//lifted from: http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values
+		function getParameterByName(name)
+		{
+		  name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+		  var regexS = "[\\?&]" + name + "=([^&#]*)";
+		  var regex = new RegExp(regexS);
+		  var results = regex.exec(window.location.search);
+		  if(results == null)
+		    return "";
+		  else
+		    return decodeURIComponent(results[1].replace(/\+/g, " "));
+		}
+
+		function onLoopCall(){
+			if(typeof runloop == "undefined")
+				return;
+
+			drawScene();
+			context.strokeStyle = "#000000";
+
+			runloop();
+		}
+
+		// function runloop(){
+
+		// }
+
+		window.setInterval(onLoopCall, 33);
+
+		
+
+	</script>
+
+</head>
+<body id="myBody">
+	<div class="panel-left">
+		<div class="content">
+			<button class="button" type="button" onclick="onButtonClick();">Click to Re-Parse Code</button>
+			<h1>Code:</h1>
+			<textarea id="command"></textarea>
+			<h1>Variable Sliders:</h1>
+			<div id="sliderDiv"></div>
+			<form>
+				<input id="drawGridCheckbox" type="checkbox" onchange="onDrawGridChange();" checked>Draw Grid</input>
+			</form>
+		</div>
+	</div>
+	<div class="panel-right">
+		<canvas id="myCanvas"></canvas>
+	</div>
+	
+</body>
+</html>

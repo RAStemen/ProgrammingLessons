@@ -1,0 +1,54 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+    "http://www.w3.org/TR/html4/strict.dtd"
+    >
+<html lang="en">
+<head>
+    <title>Simple Canvas Render Loop</title>
+    <script type="text/javascript"><!--
+        var context;
+        var canvas;
+        var x;
+        var y;
+        var radius;
+        var counter = 0.0;
+
+        window.addEventListener('load', init, false);
+        
+        function init(){
+            //set the initial values of our circle
+            radius = 20;
+            
+            canvas = document.getElementById('c');
+            context = canvas.getContext('2d');
+            
+            runLoop();
+        }
+        
+        function runLoop(){
+            // update position and radius
+            x = 150 + 50 * Math.cos( counter * 0.9 );
+            y = 150 + 50 * Math.sin( counter );
+            radius = 40 + 30 * Math.sin( counter / Math.PI );
+
+            //set the stroke color
+            var r = 128 + parseInt(128 * Math.cos(counter));
+            var g = 128 + parseInt(128 * Math.cos(counter * .5));
+            var b = 128 + parseInt(128 * Math.cos(counter * .25));
+            context.strokeStyle = "rgb("+ r + "," + g + "," + b + ")";
+            
+            //draw a circle
+            context.beginPath();
+            context.arc(x, y, radius, 0, Math.PI*2, true);
+            context.stroke();
+            context.closePath();
+            
+            // increment the counter and call the loop after a break delay
+            counter += 0.1;
+            window.setTimeout(runLoop, 14);
+        }
+    </script>
+</head>
+<body>
+    <canvas id="c" width="400px" height="400px" >Canvas not supported!</canvas>
+</body>
+</html>

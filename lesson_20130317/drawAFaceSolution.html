@@ -1,0 +1,82 @@
+<html>
+<head>
+	<script type="text/javascript">
+		var context;
+
+		function init(){
+			var canvas = document.getElementById("myCanvas");
+			context = canvas.getContext("2d");
+
+			drawFace();
+		}
+
+		function drawFace(){
+			drawLeftEye();
+			drawRightEye();
+			drawNose(0, -30);
+			drawMouth();
+			drawHead();
+		}
+
+		function drawLeftEye(){
+			context.beginPath();
+			context.arc(100, 100, 10, 0, 2 * Math.PI, true);	// pupil
+			context.stroke();
+
+			context.beginPath();
+			context.arc(100, 100, 20, 0, 2 * Math.PI, true);	// eye outer
+			context.stroke();
+		}
+
+		function drawRightEye(){
+			context.beginPath();
+			context.arc(200, 100, 10, 0, 2 * Math.PI, true);	// pupil
+			context.stroke();
+			
+			context.beginPath();
+			context.arc(200, 100, 20, 0, 2 * Math.PI, true);	// eye outer
+			context.stroke();
+		}
+
+		function drawNose(x, y){
+			context.beginPath();
+			context.moveTo(x + 130, y + 100);	//where we start drawing.
+			context.lineTo(x + 100, y + 160);
+			context.lineTo(x + 160, y + 160);
+			context.stroke();			//we can draw any number of connected lines before we call "context.stroke()"
+		}
+
+		function drawMouth(){
+			context.beginPath()
+			context.moveTo(90,  180);
+			context.lineTo(110, 190);
+			context.lineTo(130, 195);
+			context.lineTo(170, 195);
+			context.lineTo(190, 190);
+			context.lineTo(210, 180);
+			context.stroke();
+		}
+
+		function drawHead(){
+			context.beginPath();
+			context.moveTo(70, 100);						//left side of head
+			context.lineTo(70, 250);
+			
+			context.moveTo(270, 100);						// right side of head
+			context.lineTo(270, 250);
+			context.stroke();
+
+			context.beginPath();							// arcs should be drawn separate from lines
+			context.arc(170, 100, 100, 0, Math.PI, true);	// half a circle for the top of the head.
+			context.stroke();
+		}
+
+		window.addEventListener("load", init, false);
+
+	</script>
+
+</head>
+<body id="myBody">
+	<canvas id="myCanvas" width="1000px" height="1000px"></canvas>
+</body>
+</html>

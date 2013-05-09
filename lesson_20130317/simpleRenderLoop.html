@@ -1,0 +1,48 @@
+<html>
+<head>
+	<script type="text/javascript">
+		
+
+		var context;
+		var counter = 0.0;
+
+		//Object Oriented Programming
+
+		//car.drive(where)
+
+		function init(){
+			var canvas = document.getElementById("myCanvas");
+			context = canvas.getContext("2d");
+
+			runLoop();
+		}
+
+		function runLoop(){
+			counter = counter + 0.2;
+
+			context.beginPath();
+
+			var x = 150 + 50 * Math.cos(counter);
+			var y = 150 + 50 * Math.sin(counter);
+			var radius = 100 + 50 * Math.sin(counter);
+
+			var r = 128 + parseInt( 128 * Math.cos(counter * 0.5));
+			var g = 128 + parseInt( 128 * Math.cos(counter * 0.9));
+			var b = 128 + parseInt( 128 * Math.cos(counter));
+			context.strokeStyle = "rgb(" + r + "," + g + "," + b + ")";
+
+			context.arc(x, y, radius, 0, 2 * Math.PI, true );
+			context.stroke();
+
+			window.setTimeout(runLoop, 33);
+		}
+
+		window.addEventListener("load", init, false);
+
+	</script>
+
+</head>
+<body id="myBody">
+	<canvas id="myCanvas" width="400px" height="400px"></canvas>
+</body>
+</html>

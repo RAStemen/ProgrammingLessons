@@ -1,0 +1,239 @@
+
+<!-- saved from url=(0063)file:///C:/Users/M/Desktop/js-prototyping/drawAFaceClaudia.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<script type="text/javascript">
+		var context;
+		var isMouseDown = false;
+
+		var mousePos = new vec2(0, 0);
+		var score = 0;
+		var bestScore = 0;
+		var counter = 0.0;
+		var balls = new Array();
+		var paddle;
+		var powerUp;
+
+		function vec2(xValue, yValue){
+			this.x = xValue;
+			this.y = yValue;
+		}
+
+		vec2.prototype.plus = function(v2){
+			return new vec2(this.x + v2.x, this.y + v2.y);
+		}
+
+		vec2.prototype.minus = function(v2){
+			return new vec2(this.x - v2.x, this.y - v2.y);
+		}
+
+		vec2.prototype.length = function(){
+			return Math.sqrt(this.x * this.x + this.y * this.y);
+		}
+
+
+		function Ball(pos, velocity){
+			this.pos = pos;
+			this.velocity = velocity;
+			this.oldPos = new Array();
+		}
+
+		Ball.prototype.update = function(){
+			this.velocity = this.velocity.plus(new vec2(0, 0.1));
+			this.pos = this.pos.plus(this.velocity);
+
+			var delta = this.pos.minus(paddle.pos);
+
+			if(this.pos.x < 0 || this.pos.x > 1200){
+				this.velocity.x = -this.velocity.x;
+			}
+
+			if(delta.y > 0){
+				if(Math.abs(delta.x) < paddle.size / 2){
+					this.velocity.x = delta.x / 10;
+					this.velocity.y = -this.velocity.y;
+					this.pos.y = 600;
+
+					paddle.hit();
+					
+				} else if(balls.length == 1){
+					this.pos = new vec2(600, 0);
+					this.velocity = new vec2(0, 0);
+					score = 0;
+					paddle.size = 500;
+				} else {
+					var index = balls.indexOf(this);
+					balls.splice(index, 1);
+				}
+			}
+
+			this.oldPos.push(this.pos);
+			if(this.oldPos.length > 100){
+				this.oldPos.splice(0, 1);
+			}
+		}
+
+		Ball.prototype.drawTrail = function(){
+			for(var i = 0; i < this.oldPos.length; i = i + 1){
+				var pos = this.oldPos[i];
+				var b = 128 + parseInt( 128 * Math.cos(counter * 0.1));
+
+				context.fillStyle = "rgb(0, " + b + "," + parseInt(i / 0.392) + ")";
+				context.beginPath();
+				context.arc(pos.x, pos.y, i/10.0, 0, Math.PI * 2);
+				context.stroke();
+				context.fill();
+			}
+		}
+
+		Ball.prototype.draw = function(){
+			this.drawTrail();
+
+			context.fillStyle = "rgb(255, 0, 0)";
+			context.beginPath();
+			context.arc(this.pos.x, this.pos.y, 10, 0, Math.PI * 2);
+			context.stroke();
+			context.fill();
+		}
+
+
+		function Paddle(pos, size){
+			this.pos = pos;
+			this.size = size;
+			this.isGrowing = false;
+		}
+		
+		Paddle.prototype.update = function(){
+			var dx = (mousePos.x - this.pos.x) / 4.0;
+			this.pos = new vec2(this.pos.x + dx, this.pos.y);
+		}
+
+
+		Paddle.prototype.hit = function(){
+			score += 1; // += add 1 to score each time
+					
+			if(this.size < 40){
+				this.isGrowing = true;
+			} else if(this.size > 500){
+				this.isGrowing = false;
+			}
+			if(this.isGrowing == true){
+				this.size += 20;
+			} else {
+				this.size -= 20;
+			}
+
+			bestScore = Math.max(score, bestScore);
+		}
+
+		Paddle.prototype.draw = function(){
+			context.fillStyle = "rgb(0, 0, 255)";
+			context.beginPath();
+			context.strokeRect(this.pos.x - this.size/2, this.pos.y - 10, this.size, 20);
+			context.fillRect(this.pos.x - this.size/2, this.pos.y - 10, this.size, 20);
+		}
+
+
+		function MultiBall(){
+			this.pos = new vec2(Math.random() * 1200, 100);
+			this.radius = 25;
+		}
+
+		MultiBall.prototype.update = function(){
+			for(var i = 0; i < balls.length; i++){
+				var ball = balls[i];
+				if( this.checkHit(ball) ){
+					balls.push( new Ball(this.pos, new vec2(0, 0) ) );
+					powerUp = null;
+					return;
+				}
+			}
+		}
+
+		MultiBall.prototype.checkHit = function(ball){
+			var delta = this.pos.minus(ball.pos);
+			var dist = delta.length();
+
+			var radii = this.radius + 10;
+
+			if(radii > dist)
+				return true;
+			else
+				return false;
+		}
+
+		MultiBall.prototype.draw = function(){
+			context.fillStyle = "rgb(0, 255, 0);"
+			context.beginPath();
+			context.arc(this.pos.x, this.pos.y, this.radius, 0, Math.PI * 2);
+			context.fill();
+			context.stroke();
+		}
+		
+
+		function drawScore(pos){
+			context.fillStyle = "rgb(0, 0, 0)";
+			context.font = "30px Arial";
+			context.beginPath();
+			context.fillText("Score " + score + "   Best Score: " + bestScore, pos.x, pos.y);
+			context.stroke();
+			
+		}
+
+		function init(){
+			var canvas = document.getElementById("myCanvas");
+			context = canvas.getContext("2d");
+
+			paddle = new Paddle(new vec2(0, 600), 500);
+
+			var ball = new Ball(new vec2(600, 0), new vec2(0,0));
+			balls.push(ball);
+
+			powerUp = new MultiBall();
+
+			runloop();
+		}
+
+		function runloop(){
+			counter += 1.0;
+			context.clearRect(0, 0, 1200, 800);
+
+			paddle.update();
+			paddle.draw();
+
+			for(var i = 0; i < balls.length; i++){
+				var ball = balls[i];
+				ball.update();
+				ball.draw();
+			}
+
+			powerUp.update();
+			if(powerUp == null)
+				powerUp = new MultiBall();
+			powerUp.draw();
+
+
+			drawScore(new vec2(100, 100));
+
+			window.setTimeout(runloop, 15);
+		}
+
+		function onMouseDown(event){
+			mousePos = new vec2(event.clientX, event.clientY);
+			isMouseDown = true;
+		}
+
+		function onMouseUp(event){
+			isMouseDown = false;
+		}
+
+		window.onmousedown = onMouseDown;
+		window.onmouseup = onMouseUp;
+		window.onload = init;
+
+	</script>
+
+</head>
+<body id="myBody">
+	<canvas id="myCanvas" width="1200px" height="800px" style="background-color:#DDDDDD;"></canvas>
+
+</body></html>

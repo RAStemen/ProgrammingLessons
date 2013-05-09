@@ -1,0 +1,165 @@
+
+<!-- saved from url=(0063)file:///C:/Users/M/Desktop/js-prototyping/drawAFaceClaudia.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<script type="text/javascript">
+		var context;
+		var isMouseDown = false;
+		var mouthHeight = 0;
+
+
+		function init(){
+			var canvas = document.getElementById("myCanvas");
+			context = canvas.getContext("2d");
+
+			runloop();
+		}
+
+		function runloop(){
+			context.clearRect(0, 0, 800, 800);
+
+			drawFace();
+
+			window.setTimeout(runloop, 33);
+		}
+
+		function drawFace(){
+			drawLeftEye();
+			drawRightEye();
+			drawHead();
+			drawMouth();
+			drawHalfMustach(-30,-30);
+			drawLeftEyeStalk();
+			drawRightEyeStalk();
+			drawSeconedHalfMuchtach(-20,-30);
+			drawRightEar();
+			drawLeftEar();
+			drawHair();
+		}
+
+		function drawLeftEye(){
+			context.beginPath();
+			context.arc(200,100,30,0,2*Math.PI);
+			context.stroke();
+			context.beginPath();
+			context.arc(200,100,5,0,2*Math.PI);
+			context.stroke();
+		}
+		function drawRightEye(){
+			context.beginPath();
+			context.arc(400,100,30,0,2*Math.PI);
+			context.stroke();
+			context.beginPath();
+			context.arc(400,100,5,0,2*Math.PI);
+			context.stroke();
+		}
+
+		function drawHead(){
+			context.beginPath();
+			context.arc(300,400,200,0,2*Math.PI);
+			context.stroke();
+			context.fillStyle = "rgb(255, 0, 0)";
+			context.fill();
+		}
+
+		function drawMouth(){
+			if(isMouseDown == true){
+				mouthHeight = Math.min(160, mouthHeight + 3);
+			} else {
+				mouthHeight = Math.max(0, mouthHeight - 3);
+			}
+
+			if(isMouseDown == false && mouthHeight == 0){
+				
+				context.beginPath();
+				context.arc(300,500,60,0,2*Math.PI);
+				context.stroke();
+				context.fillStyle = "rgb(0, 255, 0)";
+				getContext.fill();
+			} else {
+				context.fillStyle = "rgb(0, 255, 0)";
+				context.beginPath();
+				context.fillRect(240, 440, 120, mouthHeight);
+				context.stroke();
+
+			}
+
+
+		}
+
+		function drawHalfMustach(x,y){
+			context.beginPath();
+			context.moveTo(x+300,y+400);
+			context.lineTo(x+230,y+450);
+			context.stroke();
+		}
+
+		function drawSeconedHalfMuchtach(x,y){
+			context.beginPath();
+			context.moveTo(x+430,y+450);
+			context.lineTo(x+370,y+400);
+			context.stroke();
+
+		}
+		
+		function drawLeftEyeStalk(){
+			context.beginPath();
+			context.moveTo(200,130);
+			context.lineTo(200,228);
+			context.stroke();
+
+		}
+
+		function drawRightEyeStalk(){
+			context.beginPath();
+			context.moveTo(400,130);
+			context.lineTo(400,228);
+			context.stroke();
+
+		}
+
+		function drawRightEar(){
+			context.beginPath();
+			context.arc(544,355,50,0,2*Math.PI);
+			context.stroke();
+
+		}
+
+		function drawLeftEar(){
+			context.beginPath();
+			context.arc(56,355,50,0,2*Math.PI);
+			context.stroke();
+
+		}
+
+		function drawHair(){
+			context.beginPath();
+			context.moveTo(300,201);
+			context.lineTo(300,128);
+			context.stroke();	
+
+		}
+
+		function onMouseDown(event){
+			isMouseDown = true;
+			// alert("mouse down");
+		}
+
+		function onMouseUp(event){
+			isMouseDown = false;
+			// alert("annoying");
+		}
+
+		window.onmousedown = onMouseDown;
+		window.onmouseup = onMouseUp;
+
+
+
+		window.addEventListener("load", init, false);
+
+	</script>
+
+</head>
+<body id="myBody">
+	<canvas id="myCanvas" width="800px" height="800px"></canvas>
+
+</body></html>

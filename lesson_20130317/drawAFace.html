@@ -1,0 +1,35 @@
+<html>
+<head>
+	<script type="text/javascript">
+		var context;
+
+		function init(){
+			var canvas = document.getElementById("myCanvas");
+			context = canvas.getContext("2d");
+
+			drawFace();
+		}
+
+		function drawFace(){
+			drawLeftEye();
+			//create other functions to draw the rest of the face, and call them here
+
+		}
+
+		function drawLeftEye(){
+			context.beginPath();
+
+			//put your drawing code here
+
+			context.stroke();
+		}
+
+		window.addEventListener("load", init, false);
+
+	</script>
+
+</head>
+<body id="myBody">
+	<canvas id="myCanvas" width="400px" height="400px"></canvas>
+</body>
+</html>

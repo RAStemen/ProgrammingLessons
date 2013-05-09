@@ -1,0 +1,17 @@
+1. Establish goals
+	* jumping games.
+
+
+2. What is programming?
+	* telling a computer what to do.
+
+3. HTML basic page
+	*nodes
+
+4. Hello World example:
+	* <script type="text/javascript"></tag>
+
+5. Programming basic elements:
+	* variables
+	* statements
+	* loops/iteration

@@ -1,0 +1,91 @@
+
+<!-- saved from url=(0063)file:///C:/Users/M/Desktop/js-prototyping/drawAFaceClaudia.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<script type="text/javascript">
+		var context;
+		var isMouseDown = false;
+
+		var mousePos = new vec2(0, 0);
+		var paddlePos = new vec2(0, 750);
+		var paddleWidth = 100;
+		var ballPos = new vec2(600, 0);
+		var ballVelocity = new vec2(0, 0);
+
+
+		function vec2(xValue, yValue){
+			this.x = xValue;
+			this.y = yValue;
+		}
+
+		vec2.prototype.plus = function(v2){
+			return new vec2(this.x + v2.x, this.y + v2.y);
+		}
+
+		function drawCircle(pos){
+			context.beginPath();
+			context.arc(pos.x, pos.y, 10, 0, Math.PI * 2);
+			context.stroke();
+		}
+
+		function drawPaddle(pos){
+			context.beginPath();
+			var height = 20;
+			context.strokeRect(pos.x - paddleWidth / 2, pos.y - height / 2, paddleWidth, height);
+		}
+
+		function init(){
+			var canvas = document.getElementById("myCanvas");
+			context = canvas.getContext("2d");
+
+			runloop();
+		}
+
+		function runloop(){
+			context.clearRect(0, 0, 1200, 800);
+
+			var dx = (mousePos.x - paddlePos.x) / 4.0;
+			var dy = 0;
+
+			paddlePos = new vec2(paddlePos.x + dx, paddlePos.y + dy);
+
+			ballVelocity = ballVelocity.plus(new vec2(0, 0.15));
+			ballPos = ballPos.plus(ballVelocity);
+			if(ballPos.x < 0 || ballPos.x > 1200){
+				ballVelocity.x = -ballVelocity.x;
+			}
+
+			var dy = ballPos.y - paddlePos.y;
+			if(dy >= 0){
+				var dx = ballPos.x - paddlePos.x;
+				if(Math.abs(dx) < (paddleWidth / 2)){
+					ballVelocity.y = -ballVelocity.y;
+					ballVelocity.x = dx / 10.0;
+				}
+			}
+
+			drawPaddle(paddlePos);
+			drawCircle(ballPos);
+
+			window.setTimeout(runloop, 14);
+		}
+
+		function onMouseDown(event){
+			mousePos = new vec2(event.clientX, event.clientY);
+			isMouseDown = true;
+		}
+
+		function onMouseUp(event){
+			isMouseDown = false;
+		}
+
+		window.onmousedown = onMouseDown;
+		window.onmouseup = onMouseUp;
+		window.onload = init;
+
+	</script>
+
+</head>
+<body id="myBody">
+	<canvas id="myCanvas" width="1200px" height="800px" style="background-color:#DDDDDD;"></canvas>
+
+</body></html>

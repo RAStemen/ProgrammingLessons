@@ -1,0 +1,109 @@
+
+<!-- saved from url=(0063)file:///C:/Users/M/Desktop/js-prototyping/drawAFaceClaudia.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<script type="text/javascript">
+		var context;
+		var isMouseDown = false;
+
+		var mousePos;
+		var circlePos = new vec2(0, 0);
+
+		var snake;
+
+
+		function vec2(xValue, yValue){
+			this.x = xValue;
+			this.y = yValue;
+		}
+
+		function Snake(){
+			this.sections = new Array();
+			var dir = new vec2(mousePos.x - 400, mousePos.y - 400);
+			var length = Math.sqrt(dir.x * dir.x + dir.y * dir.y);
+			dir.x *= (20 / length);
+			dir.y *= (20 / length);
+			for(var i = 0; i < 100; i++){
+				this.sections.push(new vec2(400 - dir.x * i, 400 - dir.y * i));
+			}
+		}
+
+		Snake.prototype.draw = function(){
+			for(var i = 0; i < this.sections.length; i++){
+				drawCircle(this.sections[i]);
+			}
+		}
+
+		Snake.prototype.update = function(){
+			for(var i = 0; i < this.sections.length; i++){
+				var section = this.sections[i];
+				var target;
+				if(i == 0){
+					target = mousePos;
+				} else {
+					target = this.sections[i - 1];
+				}
+				var speed = 4.0;
+				var dir = new vec2(target.x - section.x, target.y - section.y);
+				var length = Math.sqrt(dir.x * dir.x + dir.y * dir.y);
+				speed = Math.min(8, length - 20);
+				dir.x *= (speed / length);
+				dir.y *= (speed / length);
+
+				this.sections[i] = new vec2(section.x + dir.x, section.y + dir.y);
+			}
+		}
+
+		function drawCircle(pos){
+			context.beginPath();
+			context.arc(pos.x, pos.y, 10, 0, Math.PI * 2);
+			context.stroke();
+		}
+
+		function init(){
+			var canvas = document.getElementById("myCanvas");
+			context = canvas.getContext("2d");
+
+
+			runloop();
+		}
+
+		function runloop(){
+			context.clearRect(0, 0, 800, 800);
+
+			if(!snake && mousePos){
+				snake =  new Snake();
+			}
+
+			if(snake){
+				snake.update();
+				snake.draw();
+			}
+
+			window.setTimeout(runloop, 33);
+		}
+
+		function onMouseMove(event){
+			mousePos = new vec2(event.clientX, event.clientY);
+		}
+
+		function onMouseDown(event){
+			mousePos = new vec2(event.clientX, event.clientY);
+			isMouseDown = true;
+		}
+
+		function onMouseUp(event){
+			isMouseDown = false;
+		}
+
+		window.onmousedown = onMouseDown;
+		window.onmouseup = onMouseUp;
+		window.onmousemove = onMouseMove;
+		window.onload = init;
+
+	</script>
+
+</head>
+<body id="myBody">
+	<canvas id="myCanvas" width="800px" height="800px" style="background-color:#DDDDDD;"></canvas>
+
+</body></html>

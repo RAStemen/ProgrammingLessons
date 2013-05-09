@@ -1,0 +1,62 @@
+
+<!-- saved from url=(0063)file:///C:/Users/M/Desktop/js-prototyping/drawAFaceClaudia.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<script type="text/javascript">
+		var context;
+		var isMouseDown = false;
+
+		var mousePos = new vec2(0, 0);
+		var circlePos = new vec2(0, 0);
+
+
+		function vec2(xValue, yValue){
+			this.x = xValue;
+			this.y = yValue;
+		}
+
+		function drawCircle(pos){
+			context.beginPath();
+			context.arc(pos.x, pos.y, 10, 0, Math.PI * 2);
+			context.stroke();
+		}
+
+		function init(){
+			var canvas = document.getElementById("myCanvas");
+			context = canvas.getContext("2d");
+
+			runloop();
+		}
+
+		function runloop(){
+			context.clearRect(0, 0, 1200, 800);
+
+			var dx = (mousePos.x - circlePos.x) / 4.0;
+			var dy = (mousePos.y - circlePos.y) / 4.0;
+
+			circlePos = new vec2(circlePos.x + dx, circlePos.y + dy);
+
+			drawCircle(circlePos);
+
+			window.setTimeout(runloop, 33);
+		}
+
+		function onMouseDown(event){
+			mousePos = new vec2(event.clientX, event.clientY);
+			isMouseDown = true;
+		}
+
+		function onMouseUp(event){
+			isMouseDown = false;
+		}
+
+		window.onmousedown = onMouseDown;
+		window.onmouseup = onMouseUp;
+		window.onload = init;
+
+	</script>
+
+</head>
+<body id="myBody">
+	<canvas id="myCanvas" width="1200px" height="800px" style="background-color:#DDDDDD;"></canvas>
+
+</body></html>

@@ -1,0 +1,157 @@
+
+<!-- saved from url=(0063)file:///C:/Users/M/Desktop/js-prototyping/drawAFaceClaudia.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<script type="text/javascript">
+		var context;
+		var isMouseDown = false;
+
+		var mousePos = new vec2(0, 0);
+		var paddlePos = new vec2(0, 600);
+		var paddleWidth = 500;
+		var ballPos = new vec2(600, 0);
+		var oldBallPos = new Array();
+		var ballVelocity = new vec2(0, 0);
+		var score = 0;
+		var bestScore = 0;
+		var counter = 0.0;
+		var isGrowing = false;
+
+
+		function vec2(xValue, yValue){
+			this.x = xValue;
+			this.y = yValue;
+		}
+
+		vec2.prototype.plus = function(v2){
+			return new vec2(this.x + v2.x, this.y + v2.y);
+		}
+
+		vec2.prototype.minus = function(v2){
+			return new vec2(this.x - v2.x, this.y - v2.y);
+		}
+
+		function drawCircle(pos){
+			context.fillStyle = "rgb(255, 0, 0)";
+			context.beginPath();
+			context.arc(pos.x, pos.y, 10, 0, Math.PI * 2);
+			context.stroke();
+			context.fill();
+		}
+
+		function drawTrail(){
+			for(var i = 0; i < oldBallPos.length; i = i + 1){
+				var pos = oldBallPos[i];
+				var b = 128 + parseInt( 128 * Math.cos(counter * 0.1));
+
+				context.fillStyle = "rgb(0, " + b + "," + parseInt(i / 0.392) + ")";
+				context.beginPath();
+				context.arc(pos.x, pos.y, i/10.0, 0, Math.PI * 2);
+				context.stroke();
+				context.fill();
+			}
+		}
+
+		function drawRect(pos){
+			context.fillStyle = "rgb(0, 0, 255)";
+			context.beginPath();
+			context.strokeRect(pos.x - paddleWidth/2, pos.y - 10, paddleWidth, 20);
+			context.fillRect(pos.x - paddleWidth/2, pos.y - 10, paddleWidth, 20);
+		}
+
+		function drawScore(pos){
+			context.font = "30px Arial";
+			context.beginPath();
+			context.fillText("Score " + score + "   Best Score: " + bestScore, pos.x, pos.y);
+			context.stroke();
+			context.fillStyle = "rgb(0, 0, 0)";
+		}
+
+		function init(){
+			var canvas = document.getElementById("myCanvas");
+			context = canvas.getContext("2d");
+
+			runloop();
+		}
+
+		function runloop(){
+			counter += 1.0;
+			context.clearRect(0, 0, 1200, 800);
+
+			var dx = (mousePos.x - paddlePos.x) / 4.0;
+			var dy = 0; //(mousePos.y - paddlePos.y) / 4.0;
+
+			paddlePos = new vec2(paddlePos.x + dx, paddlePos.y + dy);
+
+			drawRect(paddlePos);
+
+			ballVelocity = ballVelocity.plus(new vec2(0, 0.1));
+			ballPos = ballPos.plus(ballVelocity);
+
+			var delta = ballPos.minus(paddlePos);
+
+			if(ballPos.x < 0 || ballPos.x > 1200){
+				ballVelocity.x = -ballVelocity.x;
+			}
+
+			if(delta.y > 0){
+				if(Math.abs(delta.x) < paddleWidth / 2){
+					ballVelocity.x = delta.x / 10;
+					ballVelocity.y = -ballVelocity.y;
+					ballPos.y = 600;
+					score += 1; // += add 1 to score each time
+					
+					if(paddleWidth < 40){
+						isGrowing = true;
+					} else if(paddleWidth > 500){
+						isGrowing = false;
+					}
+					if(isGrowing == true){
+						paddleWidth += 20;
+					} else {
+						paddleWidth -= 20;
+					}
+
+					
+					bestScore = Math.max(score, bestScore);
+				} else {
+					ballPos = new vec2(600, 0);
+					ballVelocity = new vec2(0, 0);
+					score = 0;
+					paddleWidth = 500;
+				}
+			}
+
+			oldBallPos.push(ballPos);
+			if(oldBallPos.length > 100){
+				oldBallPos.splice(0, 1);
+			}
+
+			drawTrail();
+
+			drawCircle(ballPos);
+
+			drawScore(new vec2(100, 100));
+
+			window.setTimeout(runloop, 15);
+		}
+
+		function onMouseDown(event){
+			mousePos = new vec2(event.clientX, event.clientY);
+			isMouseDown = true;
+		}
+
+		function onMouseUp(event){
+			isMouseDown = false;
+		}
+
+		window.onmousedown = onMouseDown;
+		window.onmouseup = onMouseUp;
+		window.onload = init;
+
+	</script>
+
+</head>
+<body id="myBody">
+	<canvas id="myCanvas" width="1200px" height="800px" style="background-color:#DDDDDD;"></canvas>
+
+</body></html>
